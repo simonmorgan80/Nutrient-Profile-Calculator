@@ -16,3 +16,14 @@ export type Result = {
     cProteinShown: number;
     sodiumMg: number;
 }
+
+export type NpInputs = {
+    isDrink: boolean;
+    energy: number;
+    saturatedFat: number;
+    totalSugars: number;
+    sodiumMg: number;
+    fvn: number;
+    fibre: number;
+    protein: number;
+};

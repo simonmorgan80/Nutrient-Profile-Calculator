@@ -1,82 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import type { FoodType, SodiumType, Result } from './lib/types';
+import { toNum, saltToSodiumMg, sodiumMgToSalt, calculateScore } from './lib/scoring';
 import FoodTypeToggle from './components/FoodTypeToggle';
 import NutrientInput from './components/NutrientInput';
 import SodiumTypeToggle from './components/SodiumTypeToggle';
-
 import ResultCard from './components/ResultCard';
-
-
-// --- A points scoring tables ---
-function energyPoints(kj: number, isDrink: boolean) {
-    const thresholds = isDrink
-        ? [0, 30, 60, 90, 120, 150, 180, 210, 240, 270]
-        : [335, 670, 1005, 1340, 1675, 2010, 2345, 2680, 3015, 3350];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (kj > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-function satFatPoints(g: number) {
-    const thresholds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (g > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-function sugarPoints(g: number, isDrink: boolean) {
-    const thresholds = isDrink
-        ? [0, 1.5, 3, 4.5, 6, 7.5, 9, 10.5, 12, 13.5]
-        : [4.5, 9, 13.5, 18, 22.5, 27, 31, 36, 40, 45];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (g > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-function sodiumPoints(mg: number) {
-    const thresholds = [90, 180, 270, 360, 450, 540, 630, 720, 810, 900];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (mg > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-// --- C points scoring tables ---
-function fvnPoints(pct: number) {
-    if (pct > 80) return 5;
-    if (pct > 60) return 2;
-    if (pct > 40) return 1;
-    return 0;
-}
-
-function fibrePoints(g: number) {
-    const thresholds = [0.9, 1.9, 2.8, 3.7, 4.7];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (g > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-function proteinPoints(g: number) {
-    const thresholds = [1.6, 3.2, 4.8, 6.4, 8.0];
-    for (let i = thresholds.length - 1; i >= 0; i--) {
-        if (g > thresholds[i]) return i + 1;
-    }
-    return 0;
-}
-
-function toNum(v: string) {
-    const n = parseFloat(v);
-    return isNaN(n) ? 0 : n;
-}
 
 function App() {
     const [foodType, setFoodType] = useState<FoodType>('food');
     const [sodiumType, setSodiumType] = useState<SodiumType>('default');
+    const [result, setResult] = useState<Result | null>(null);
+    const resultRef = useRef<HTMLDivElement>(null);
 
+    // Nutrient values
     const [energy, setEnergy] = useState('');
     const [saturatedFat, setSaturatedFat] = useState('');
     const [totalSugars, setTotalSugars] = useState('');
@@ -85,23 +21,16 @@ function App() {
     const [fibre, setFibre] = useState('');
     const [protein, setProtein] = useState('');
 
-    const [result, setResult] = useState<Result | null>(null);
-
+    // Sodium/Salt conversion
     const sodiumLabel = sodiumType === 'salt' ? 'Salt' : 'Sodium';
     const sodiumUnit = sodiumType === 'salt' ? 'g' : 'mg';
-
-    const resultRef = useRef<HTMLDivElement>(null);
-
-    // Convert existing sodium value when the unit toggle changes
     const handleSodiumTypeChange = (newType: SodiumType) => {
         const currentVal = toNum(sodium);
         if (currentVal > 0) {
             if (newType === 'salt') {
-                // sodium mg -> salt g
-                setSodium(String(+(currentVal / 400).toFixed(3)));
+                setSodium(String(sodiumMgToSalt(currentVal)));
             } else {
-                // salt g -> sodium mg
-                setSodium(String(+(currentVal * 400).toFixed(1)));
+                setSodium(String(saltToSodiumMg(currentVal)));
             }
         }
         setSodiumType(newType);
@@ -112,47 +41,32 @@ function App() {
         return sodiumType === 'salt' ? val * 400 : val;
     };
 
-    const calculate = () => {
-        const isDrink = foodType === 'drink';
-        const sodiumMg = getSodiumMg();
-
-        const aEnergy = energyPoints(toNum(energy), isDrink);
-        const aSatFat = satFatPoints(toNum(saturatedFat));
-        const aSugar = sugarPoints(toNum(totalSugars), isDrink);
-        const aSodium = sodiumPoints(sodiumMg);
-        const totalA = aEnergy + aSatFat + aSugar + aSodium;
-
-        const cFvn = fvnPoints(toNum(fvn));
-        const cFibre = fibrePoints(toNum(fibre));
-        const cProtein = proteinPoints(toNum(protein));
-        const totalC = cFvn + cFibre + cProtein;
-
-        let score: number;
-        if (totalA >= 11 && cFvn < 5) {
-            score = totalA - (cFvn + cFibre);
-        } else {
-            score = totalA - totalC;
-        }
-
-        const threshold = isDrink ? 1 : 4;
-        const isHealthy = score < threshold;
-        const cProteinShown = totalA >= 11 && cFvn < 5 ? 0 : cProtein;
-
-        setResult({
-            score,
-            isHealthy,
-            isDrink,
-            threshold,
-            aEnergy,
-            aSatFat,
-            aSugar,
-            aSodium,
-            cFvn,
-            cFibre,
-            cProtein,
-            cProteinShown,
-            sodiumMg,
+    // Score calculation
+    const handleCalculate = () => {
+        const npmResult = calculateScore({
+            isDrink: foodType === 'drink',
+            energy: toNum(energy),
+            saturatedFat: toNum(saturatedFat),
+            totalSugars: toNum(totalSugars),
+            sodiumMg: getSodiumMg(),
+            fvn: toNum(fvn),
+            fibre: toNum(fibre),
+            protein: toNum(protein),
         });
+        setResult(npmResult);
+    };
+
+    const handleResetAll = () => {
+        setFoodType('food');
+        setSodiumType('default');
+        setEnergy('');
+        setSaturatedFat('');
+        setTotalSugars('');
+        setSodium('');
+        setFvn('');
+        setFibre('');
+        setProtein('');
+        setResult(null);
     };
 
     useEffect(() => {
@@ -171,7 +85,6 @@ function App() {
 
                 <div className="calculator__body">
                     <form>
-                        {/* item type */}
                         <FoodTypeToggle value={foodType} onChange={setFoodType}/>
 
                         {/* A points */}
@@ -240,7 +153,11 @@ function App() {
                                 />
                             </div>
                         </fieldset>
-                        <button className="button" type="button" onClick={calculate}>Calculate NPM Score</button>
+
+                        <div className="btn-group">
+                            <button className="btn" type="button" onClick={handleCalculate}>Calculate NPM Score</button>
+                            <button className="btn btn--secondary" type="button" onClick={handleResetAll}>Reset</button>
+                        </div>                        
                     </form>
                 </div>
 

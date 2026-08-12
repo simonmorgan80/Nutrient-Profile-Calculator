@@ -1,4 +1,4 @@
-.button {
+.btn {
     appearance: none;
     background-color: var(--color-blue);
     border: 0;
@@ -15,7 +15,16 @@
     user-select: none;
 }
 
-.button:is(:hover, :focus) {
+.btn:is(:hover, :focus) {
     background-color: var(--color-blue-dark);
     color: var(--color-white);
+}
+
+.btn--secondary {
+    background-color: var(--color-blue-dark);
+}
+
+.btn-group {
+    display: flex;
+    gap: 1.5rem;
 }
