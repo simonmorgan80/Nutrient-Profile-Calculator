@@ -1,0 +1,11 @@
+@import './global/reset.css';
+@import './global/variables.css';
+
+@import './global/base.css';
+@import './global/buttons.css';
+@import './global/container.css';
+@import './global/typography.css';
+
+@import './components/calculator.css';
+
+@import './global/utilities.css';

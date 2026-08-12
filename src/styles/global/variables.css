@@ -1,0 +1,60 @@
+:root {
+    --container-max-width: 80rem;
+
+    --color-blue: #2563eb;
+    --color-blue-dark: #1f2b54;
+    --color-grey-dark: #444;
+    --color-grey-light: #f6f6f8;
+    --color-grey: #e5eaea;
+    --color-white: #fff;
+
+    /* --color-light: var(--color-white);
+    --color-dark: var(--color-grey-dark); */
+
+    --font-base: ui-sans-serif, system-ui, sans-serif;
+    --font-size-base: var(--text-size-1);
+
+    --leading-base: 1.5;
+    --leading-tight: 1.2;
+
+    --text-size-0: 0.75rem;
+    --text-size-1: 1rem;
+    --text-size-2: 1.125rem;
+    --text-size-3: 1.25rem;
+    --text-size-4: 1.5rem;
+    --text-size-5: 1.75rem;
+
+    --heading-size-1: 1.75rem;
+    --heading-size-2: 1.5rem;
+    --heading-size-3: 1.25rem;
+    --heading-size-4: 1.125rem;
+    --heading-size-5: 1rem;
+    --heading-size-6: 0.875rem;
+
+    --space-1: 1rem;
+    --space-2: 1.5rem;
+    --space-3: 2rem;
+    --space-4: 3rem;
+
+    --section-space: 4rem;
+}
+
+@media screen and (min-width: 80em) {
+    :root {
+        --text-size-0: 0.875rem;
+        --text-size-1: 1.125rem;
+        --text-size-2: 1.25rem;
+        --text-size-3: 1.5rem;
+        --text-size-4: 1.75rem;
+        --text-size-5: 2rem;
+
+        --heading-size-1: 2.5rem;
+        --heading-size-2: 2.25rem;
+        --heading-size-3: 1.75rem;
+        --heading-size-4: 1.5rem;
+        --heading-size-5: 1.25rem;
+        --heading-size-6: 1.125rem;
+
+        --section-space: 7rem;
+    }
+}

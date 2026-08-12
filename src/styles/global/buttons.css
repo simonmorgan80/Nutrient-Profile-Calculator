@@ -1,0 +1,21 @@
+.button {
+    appearance: none;
+    background-color: var(--color-blue);
+    border: 0;
+    border-radius: 0;
+    color: var(--color-white);
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 400;
+    font-family: inherit;
+    letter-spacing: 1px;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    transition: background-color 0.1s ease, color 0.1s ease;
+    user-select: none;
+}
+
+.button:is(:hover, :focus) {
+    background-color: var(--color-blue-dark);
+    color: var(--color-white);
+}
