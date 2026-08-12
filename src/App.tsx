@@ -1,23 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import type { FoodType, SodiumType, Result } from './lib/types';
+import FoodTypeToggle from './components/FoodTypeToggle';
+import NutrientInput from './components/NutrientInput';
+import SodiumTypeToggle from './components/SodiumTypeToggle';
 
-type FoodType = 'food' | 'drink';
-type SodiumType = 'default' | 'salt';
+import ResultCard from './components/ResultCard';
 
-type Result = {
-    score: number;
-    isHealthy: boolean;
-    isDrink: boolean;
-    threshold: number;
-    aEnergy: number;
-    aSatFat: number;
-    aSugar: number;
-    aSodium: number;
-    cFvn: number;
-    cFibre: number;
-    cProtein: number;
-    cProteinShown: number;
-    sodiumMg: number;
-}
 
 // --- A points scoring tables ---
 function energyPoints(kj: number, isDrink: boolean) {
@@ -182,245 +170,85 @@ function App() {
                 </div>
 
                 <div className="calculator__body">
-                    <form action="">
-
+                    <form>
                         {/* item type */}
-                        <fieldset>
-                            <div className="checkbox-group">
-                                <div className="checkbox-group__field">
-                                    <input
-                                        id="food"
-                                        name="foodType"
-                                        type="radio"
-                                        value="food"
-                                        checked={foodType === 'food'}
-                                        onChange={() => setFoodType('food')}
-                                        className="visually-hidden"
-                                    />
-                                    <label htmlFor="food">Food</label>
-                                </div>
-                                <div className="checkbox-group__field">
-                                    <input
-                                        id="drink"
-                                        name="foodType"
-                                        type="radio"
-                                        value="drink"
-                                        checked={foodType === 'drink'}
-                                        onChange={() => setFoodType('drink')}
-                                        className="visually-hidden"
-                                    />
-                                    <label htmlFor="drink">Drink</label>
-                                </div>
-                            </div>
-                        </fieldset>
+                        <FoodTypeToggle value={foodType} onChange={setFoodType}/>
 
                         {/* A points */}
                         <fieldset>
                             <legend>A Points (negative nutrients)</legend>
-
                             <div className="input-group">
-
-                                <div className="input-group__field">
-                                    <label htmlFor="energy">Energy</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="energy"
-                                            type="number"
-                                            placeholder="0"
-                                            value={energy}
-                                            onChange={(e) => setEnergy(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">kJ</span>
-                                    </div>
-                                </div>
-
-                                <div className="input-group__field">
-                                    <label htmlFor="saturatedFat">Saturated Fat</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="saturatedFat"
-                                            type="number"
-                                            placeholder="0"
-                                            value={saturatedFat}
-                                            onChange={(e) => setSaturatedFat(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">g</span>
-                                    </div>
-                                </div>
-
-                                <div className="input-group__field">
-                                    <label htmlFor="totalSugars">Total Sugars</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="totalSugars"
-                                            type="number"
-                                            placeholder="0"
-                                            value={totalSugars}
-                                            onChange={(e) => setTotalSugars(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">g</span>
-                                    </div>
-                                </div>
-
-                                <div className="input-group__field">
-                                    <label htmlFor="sodium">{sodiumLabel}</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="sodium"
-                                            type="number"
-                                            placeholder="0"
-                                            value={sodium}
-                                            onChange={(e) => setSodium(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">{sodiumUnit}</span>
-                                    </div>
-
-                                    <div className="checkbox-group checkbox-group--small">
-                                        <div className="checkbox-group__field">
-                                            <input
-                                                id="sodiumDefault"
-                                                name="sodiumType"
-                                                type="radio"
-                                                value="default"
-                                                checked={sodiumType === 'default'}
-                                                onChange={() => handleSodiumTypeChange('default')}
-                                                className="visually-hidden"
-                                            />
-                                            <label htmlFor="sodiumDefault">Sodium</label>
-                                        </div>
-                                        <div className="checkbox-group__field">
-                                            <input
-                                                id="sodiumSalt"
-                                                name="sodiumType"
-                                                type="radio"
-                                                value="salt"
-                                                checked={sodiumType === 'salt'}
-                                                onChange={() => handleSodiumTypeChange('salt')}
-                                                className="visually-hidden"
-                                            />
-                                            <label htmlFor="sodiumSalt">Salt</label>
-                                        </div>
-                                    </div>
-                                </div>
-
+                                <NutrientInput
+                                    id="energy"
+                                    label="Energy"
+                                    suffix="kJ"
+                                    value={energy}
+                                    onChange={setEnergy}
+                                />
+                                <NutrientInput
+                                    id="saturatedFat"
+                                    label="Saturated Fat"
+                                    suffix="g"
+                                    value={saturatedFat}
+                                    onChange={setSaturatedFat}
+                                />
+                                <NutrientInput
+                                    id="totalSugars"
+                                    label="Total Sugars"
+                                    suffix="g"
+                                    value={totalSugars}
+                                    onChange={setTotalSugars}
+                                />
+                                <NutrientInput
+                                    id="sodium"
+                                    label={sodiumLabel}
+                                    suffix={sodiumUnit}
+                                    value={sodium}
+                                    onChange={setSodium}
+                                >
+                                    <SodiumTypeToggle onChange={handleSodiumTypeChange} value={sodiumType} />
+                                </NutrientInput>
                             </div>
                         </fieldset>
 
                         {/* C points */}
                         <fieldset>
                             <legend>C Points (positive nutrients)</legend>
-
                             <div className="input-group">
-                                <div className="input-group__field">
-                                    <label htmlFor="fvn">Fruit/Veg/Nuts %</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="fvn"
-                                            type="number"
-                                            placeholder="0"
-                                            min="0"
-                                            max="100"
-                                            value={fvn}
-                                            onChange={(e) => setFvn(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">%</span>
-                                    </div>
-                                </div>
-
-                                <div className="input-group__field">
-                                    <label htmlFor="fibre">Fibre (AOAC)</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="fibre"
-                                            type="number"
-                                            placeholder="0"
-                                            value={fibre}
-                                            onChange={(e) => setFibre(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">g</span>
-                                    </div>
-                                </div>
-
-                                <div className="input-group__field">
-                                    <label htmlFor="protein">Protein</label>
-                                    <div className="input-group__control">
-                                        <input
-                                            id="protein"
-                                            type="number"
-                                            placeholder="0"
-                                            value={protein}
-                                            onChange={(e) => setProtein(e.target.value)}
-                                        />
-                                        <span className="input-group__suffix">g</span>
-                                    </div>
-                                </div>
-
+                                <NutrientInput
+                                    id="fvn"
+                                    label="Fruit/Veg/Nuts %"
+                                    suffix="%"
+                                    value={fvn}
+                                    onChange={setFvn}
+                                    min="0"
+                                    max="100"
+                                />
+                                <NutrientInput
+                                    id="fibre"
+                                    label="Fibre (AOAC)"
+                                    suffix="g"
+                                    value={fibre}
+                                    onChange={setFibre}
+                                />
+                                <NutrientInput
+                                    id="protein"
+                                    label="Protein"
+                                    suffix="g"
+                                    value={protein}
+                                    onChange={setProtein}
+                                />
                             </div>
-
                         </fieldset>
                         <button className="button" type="button" onClick={calculate}>Calculate NPM Score</button>
-
                     </form>
                 </div>
 
+                {result && (
                 <div className="calculator__results">
-
-                    {result && (
-                        <div className={`result show`} ref={resultRef}>
-                            <div className={`score-circle ${result.isHealthy ? 'healthy' : 'unhealthy'}`} id="scoreCircle">
-                                <span className="score-value" id="scoreValue">{result.score}</span>
-                                <span className="score-label">NPM Score</span>
-                            </div>
-                            <div className="text-center">
-
-                                <p className={`result-text ${result.isHealthy ? 'healthy' : 'unhealthy'}`} id="resultText">
-                                    {result.isHealthy ? '✓ Healthier Choice' : '⚠️ Less Healthy'}
-                                </p>
-                                <p className="result-detail" id="resultDetail">
-                                    {result.isDrink
-                                        ? `Drinks scoring less than ${result.threshold} can be advertised to children.`
-                                        : `Foods scoring less than ${result.threshold} can be advertised to children.`}
-                                </p>
-
-                            </div>
-                            <ul className="breakdown" id="breakdown">
-                                <li className="breakdown-row">
-                                    <span>Energy</span>
-                                    <span className="negative">+{result.aEnergy}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Saturated Fat</span>
-                                    <span className="negative">+{result.aSatFat}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Sugars</span>
-                                    <span className="negative">+{result.aSugar}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Sodium</span>
-                                    <span className="negative">+{result.aSodium}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Fruit/Veg/Nuts</span>
-                                    <span className="positive">−{result.cFvn}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Fibre</span>
-                                    <span className="positive">−{result.cFibre}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Protein</span>
-                                    <span className="positive">−{result.cProteinShown}</span>
-                                </li>
-                                <li className="breakdown-row">
-                                    <span>Final Score</span>
-                                    <span>{result.score}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    )}
-
+                    <ResultCard result={result} ref={resultRef}/>
                 </div>
+                )}
             </div>
         </div>
     )
